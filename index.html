@@ -112,8 +112,16 @@
 
 <!-- dataStream.js must come before main.js so window.initializeRpaStream is defined -->
 <script src="dataStream.js"></script>
-<!-- Chart.js — used exclusively for the Analytics View overlay (bounty task 2 requires this library only) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<!-- Chart.js — used exclusively for the Analytics View overlay (bounty task 2 requires this library only).
+     Vendored locally in /vendor so the app works offline / behind firewalls that block cdnjs,
+     instead of depending on a third-party CDN being reachable at runtime. -->
+<script src="vendor/chart.umd.js"></script>
+<script>
+  if (!window.Chart) {
+    document.write('<p style="color:#f87171;font-family:monospace;padding:16px;">' +
+      'Chart.js failed to load from vendor/chart.umd.js — check that the file exists in the project folder.</p>');
+  }
+</script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>
