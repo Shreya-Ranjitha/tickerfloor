@@ -4,14 +4,13 @@
  * All functions are pure and safe against non-finite inputs.
  */
 
-/** Format a USD value compactly: $1.2B, $45.6M, $1.2K */
+/** Format a USD value with full comma-grouped digits: $1,234,567 */
 export function formatUSD(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return '$—';
-  if (Math.abs(v) >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
-  if (Math.abs(v) >= 1e6) return `$${(v / 1e6).toFixed(2)}M`;
-  if (Math.abs(v) >= 1e3) return `$${(v / 1e3).toFixed(1)}K`;
-  return `$${v.toFixed(0)}`;
+  const rounded = Math.round(v);
+  const sign = rounded < 0 ? '-' : '';
+  return `${sign}$${Math.abs(rounded).toLocaleString('en-US')}`;
 }
 
 /** Format a ROI/percent value with sign: +12.34%, -5.20% */

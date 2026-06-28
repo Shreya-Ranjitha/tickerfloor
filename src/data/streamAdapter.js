@@ -64,7 +64,7 @@ function applyTickerJitter(row) {
     if (Math.random() < RECOVERY_PROBABILITY) {
       r.project_status = 'Active';
     }
-  } else if (r.project_status === 'Active' || r.project_status === 'In Progress') {
+  } else if (r.project_status === 'Active' || r.project_status === 'Planned') {
     if (Math.random() < CRASH_PROBABILITY) {
       r.project_status = 'Failed';
     }

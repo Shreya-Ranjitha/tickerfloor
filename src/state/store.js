@@ -17,11 +17,22 @@ let _justFailedThisTick = [];
 const FLASH_WINDOW_MS = 12000;
 const _recentFailures = new Map(); // project_id → timestamp of last failure
 
+// Timestamp-based recent-negative-ROI tracking, same windowed pattern as
+// failures. Fires only on the *transition* into negative ROI (crossing from
+// >=0 to <0), so it reads as a flash event rather than a permanent state.
+const _recentNegativeRoi = new Map(); // project_id → timestamp of last negative-ROI transition
+
 // Running sums for KPI bar
 let _totalRobots = 0;
 let _totalSavings = 0;
 let _totalHours = 0;
 let _isDirty = false;
+
+// Total Streamed Rows Processed — every row the stream has ever delivered,
+// including repeat updates to the same project_id. This is a strictly
+// increasing throughput counter, distinct from store.size() (unique rows
+// currently tracked), per the spec's Feature 1 requirement.
+let _totalRowsStreamed = 0;
 
 // Baseline captured at CSV load for KPI deltas
 let _baselineRobots = 0;
@@ -59,6 +70,8 @@ export const TickerStore = {
     _justFailedThisTick = [];
     let deltaRobots = 0, deltaSavings = 0;
 
+    _totalRowsStreamed += batch.length;
+
     for (const row of batch) {
       const prev = _store.get(row.project_id);
 
@@ -86,6 +99,15 @@ export const TickerStore = {
           _justFailedThisTick.push(row);
           _recentFailures.set(row.project_id, Date.now());
         }
+
+        // Negative-ROI transition detection — fires the flash only on the
+        // moment ROI crosses from >=0 into negative, not on every tick a
+        // row happens to still be negative.
+        const prevRoi = Number(prev.roi_percent);
+        const newRoi  = Number(row.roi_percent);
+        if (Number.isFinite(prevRoi) && Number.isFinite(newRoi) && newRoi < 0 && prevRoi >= 0) {
+          _recentNegativeRoi.set(row.project_id, Date.now());
+        }
       } else {
         // New row (shouldn't happen often post-baseline, but guard it)
         const r = Number.isFinite(Number(row.robots_deployed))    ? Number(row.robots_deployed)    : 0;
@@ -103,6 +125,9 @@ export const TickerStore = {
     const cutoff = Date.now() - FLASH_WINDOW_MS;
     for (const [id, ts] of _recentFailures) {
       if (ts < cutoff) _recentFailures.delete(id);
+    }
+    for (const [id, ts] of _recentNegativeRoi) {
+      if (ts < cutoff) _recentNegativeRoi.delete(id);
     }
 
     _isDirty = true;
@@ -138,11 +163,23 @@ export const TickerStore = {
     return Date.now() - ts < FLASH_WINDOW_MS;
   },
 
+  /**
+   * True if this row's ROI crossed into negative territory within the last
+   * FLASH_WINDOW_MS milliseconds. Used by the grid to apply the animated
+   * negative-ROI flash class (same auto-expiring pulse as the crash flash).
+   */
+  didRecentlyGoNegative(id) {
+    const ts = _recentNegativeRoi.get(id);
+    if (!ts) return false;
+    return Date.now() - ts < FLASH_WINDOW_MS;
+  },
+
   // --- KPI accessors ---
 
   getTotalRobots()  { return _totalRobots;  },
   getTotalSavings() { return _totalSavings; },
   getTotalHours()   { return _totalHours;   },
+  getTotalRowsStreamed() { return _totalRowsStreamed; },
 
   getBaselineRobots()  { return _baselineRobots;  },
   getBaselineSavings() { return _baselineSavings; },

@@ -227,6 +227,7 @@ function _writeRowContent(rowNode, row) {
   // Crash flash
   const failed = row.project_status === 'Failed';
   const recentFail = TickerStore.didRecentlyFail(row.project_id);
+  const recentNegativeRoi = TickerStore.didRecentlyGoNegative(row.project_id);
 
   if (recentFail && !rowNode.classList.contains('row-crash-flash')) {
     rowNode.classList.add('row-crash-flash');
@@ -234,7 +235,15 @@ function _writeRowContent(rowNode, row) {
     rowNode.classList.remove('row-crash-flash');
   }
 
-  // Row base classes
+  if (recentNegativeRoi && !rowNode.classList.contains('row-negative-flash')) {
+    rowNode.classList.add('row-negative-flash');
+  } else if (!recentNegativeRoi && rowNode.classList.contains('row-negative-flash')) {
+    rowNode.classList.remove('row-negative-flash');
+  }
+
+  // Row base classes — steady (non-animated) tint for any row currently
+  // sitting at negative ROI, independent of the flash above, so the state
+  // stays visually legible after the flash auto-expires.
   rowNode.classList.toggle('row-failed',   failed);
   rowNode.classList.toggle('row-negative', !failed && Number(row.roi_percent) < 0);
 

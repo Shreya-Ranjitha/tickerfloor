@@ -19,6 +19,7 @@ import { TickerTape }         from './features/tickerTape.js';
 import { RowInspector }       from './features/rowInspector.js';
 import { AnalyticsView }      from './features/analyticsView.js';
 import { SnapshotExport }     from './features/snapshotExport.js';
+import { MultiSelectFilter }  from './features/multiSelectFilter.js';
 
 // ─── DOM references ─────────────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -93,14 +94,10 @@ function _buildFilterUI(rows) {
   ];
 
   for (const { field, label, elId } of filterDefs) {
-    const sel = $(elId);
-    if (!sel) continue;
+    const containerEl = $(elId);
+    if (!containerEl) continue;
 
-    sel.innerHTML = `<option value="">All ${label}s</option>` +
-      options[field].map(v => `<option value="${v}">${v}</option>`).join('');
-
-    sel.addEventListener('change', () => {
-      FilterEngine.setFilter(field, sel.value);
+    MultiSelectFilter.mount(containerEl, field, label, options[field], () => {
       recomputeAndRender();
       _updateResultCount();
     });
@@ -121,7 +118,7 @@ function _buildFilterUI(rows) {
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
       FilterEngine.clearAll();
-      filterDefs.forEach(d => { const el = $(d.elId); if (el) el.value = ''; });
+      MultiSelectFilter.clearAllInstances();
       if (searchEl) searchEl.value = '';
       Sorter.clear();
       recomputeAndRender();

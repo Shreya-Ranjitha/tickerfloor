@@ -1,50 +1,55 @@
 /**
  * kpiBar.js
- * TickerFloor Index KPI strip — three live streaming counters.
- *   1. Listed Securities (total row count)
- *   2. Units Deployed (total robots_deployed, with delta)
- *   3. Index Cap (total annual_savings_usd, with delta)
+ * High-Density KPI strip — Feature 1 (10 pts).
+ * Exactly the three counters the spec requires:
+ *   1. Total Streamed Rows Processed — running count of every row delivered
+ *      by the stream since boot (including repeat updates), strictly
+ *      increasing every ~200ms tick.
+ *   2. Active Robots Deployed Count — running sum of robots_deployed
+ *      across all currently-tracked rows.
+ *   3. Global Cumulative Savings — running sum of annual_savings_usd
+ *      across all currently-tracked rows.
  */
 
 import { TickerStore } from '../state/store.js';
 import { formatInt, formatUSD } from './sanitize.js';
 
-let _elCount   = null;
-let _elUnits   = null;
-let _elCap     = null;
-let _elUnitsΔ  = null;
-let _elCapΔ    = null;
+let _elStreamed = null;
+let _elUnits    = null;
+let _elCap      = null;
+let _elUnitsΔ   = null;
+let _elCapΔ     = null;
 
 export const KpiBar = {
   mount(containerEl) {
     containerEl.innerHTML = `
       <div class="kpi-card">
-        <div class="kpi-label">Listed Securities</div>
-        <div class="kpi-value mono" id="kpi-count">—</div>
+        <div class="kpi-label">Total Streamed Rows Processed</div>
+        <div class="kpi-value mono" id="kpi-streamed">—</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Units Deployed</div>
+        <div class="kpi-label">Active Robots Deployed Count</div>
         <div class="kpi-value mono" id="kpi-units">—</div>
         <div class="kpi-delta" id="kpi-units-delta"></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Index Cap (Savings)</div>
+        <div class="kpi-label">Global Cumulative Savings</div>
         <div class="kpi-value mono" id="kpi-cap">—</div>
         <div class="kpi-delta" id="kpi-cap-delta"></div>
       </div>
     `;
-    _elCount  = document.getElementById('kpi-count');
-    _elUnits  = document.getElementById('kpi-units');
-    _elCap    = document.getElementById('kpi-cap');
-    _elUnitsΔ = document.getElementById('kpi-units-delta');
-    _elCapΔ   = document.getElementById('kpi-cap-delta');
+    _elStreamed = document.getElementById('kpi-streamed');
+    _elUnits    = document.getElementById('kpi-units');
+    _elCap      = document.getElementById('kpi-cap');
+    _elUnitsΔ   = document.getElementById('kpi-units-delta');
+    _elCapΔ     = document.getElementById('kpi-cap-delta');
   },
 
   /** Called each render frame */
   render() {
-    if (!_elCount) return;
+    if (!_elStreamed) return;
 
-    _elCount.textContent = formatInt(TickerStore.size());
+    _elStreamed.textContent = formatInt(TickerStore.getTotalRowsStreamed());
 
     const units = TickerStore.getTotalRobots();
     const cap   = TickerStore.getTotalSavings();
@@ -73,3 +78,4 @@ function _renderDelta(el, delta, formatted) {
   el.textContent = `${up ? '▲' : '▼'} ${formatted}`;
   el.className   = `kpi-delta ${up ? 'delta-up' : 'delta-down'}`;
 }
+
