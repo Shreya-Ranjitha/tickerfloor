@@ -37,6 +37,8 @@
 
     <!-- Controls -->
     <div class="top-controls">
+      <div id="snapshot-export-control"></div>
+      <div id="analytics-control"></div>
       <div id="pause-control"></div>
     </div>
   </header>
@@ -110,6 +112,8 @@
 
 <!-- dataStream.js must come before main.js so window.initializeRpaStream is defined -->
 <script src="dataStream.js"></script>
+<!-- Chart.js — used exclusively for the Analytics View overlay (bounty task 2 requires this library only) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

@@ -118,7 +118,7 @@ body {
   letter-spacing: .12em;
 }
 
-.top-controls { margin-left: auto; flex-shrink: 0; }
+.top-controls { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
 
 /* ── Ticker tape ─────────────────────────────────────────────────────── */
 .tape-panel {
@@ -682,3 +682,177 @@ body.market-halted .grid-row:hover {
   word-break: break-word;
 }
 .inspector-empty { color: var(--muted); }
+
+/* ── Analytics View (bounty feature 2) ──────────────────────────────── */
+
+.analytics-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-bright);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.analytics-toggle-btn:not(:disabled):hover {
+  border-color: var(--teal-dim);
+  color: var(--teal);
+}
+.analytics-toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.analytics-icon { font-size: 13px; }
+
+.analytics-panel {
+  width: min(980px, 94vw);
+}
+
+.analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 16px 20px 4px;
+}
+.analytics-stat {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.analytics-stat-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.analytics-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--text-bright);
+}
+
+.analytics-body {
+  padding-bottom: 20px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px 20px 4px;
+}
+@media (max-width: 720px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+.analytics-chart-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px 8px;
+}
+.analytics-chart-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.analytics-chart-wrap {
+  position: relative;
+  height: 220px;
+}
+
+/* ── Mobile breakpoint ───────────────────────────────────────────────
+   The app shell had no responsive behavior at all: the Pause/Analytics
+   controls were flex-shrink:0 and simply overflowed past the viewport
+   with no scroll affordance, making both bounty features unreachable
+   on a phone. This fixes that, plus the filter bar and side panels
+   which had the same overflow problem.                                */
+@media (max-width: 760px) {
+  .top-bar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 12px;
+    row-gap: 8px;
+  }
+  .brand        { order: 1; }
+  .top-controls { order: 2; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .tape-panel   { order: 3; flex: 1 1 100%; }
+
+  /* The three header action buttons (Snapshot Export / Analytics View /
+     Halt Market) at full desktop padding+font-size don't fit a ~390px
+     screen without clipping — tighten them down for mobile specifically. */
+  .snapshot-export-btn,
+  .analytics-toggle-btn,
+  .halt-btn {
+    padding: 6px 9px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .halted-label { display: block; margin-left: 0; margin-top: 4px; flex: 1 1 100%; }
+
+  .kpi-bar  { flex-wrap: wrap; }
+  .kpi-card { flex: 1 1 45%; }
+
+  .filter-bar {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    row-gap: 8px;
+  }
+  .search-group { flex: 1 1 100%; order: 5; }
+  .result-count { flex: 1 1 100%; order: 6; }
+
+  .content-area { flex-direction: column; overflow-y: auto; }
+  .grid-panel   { flex: 1 1 auto; min-height: 280px; }
+  .side-panels  {
+    width: 100%;
+    flex-shrink: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 240px;
+  }
+
+  .grid-header,
+  .grid-viewport { overflow-x: auto; }
+
+  /* Overlays (Row Inspector / Analytics View) already scale via
+     min(Npx, vw) widths — just tighten side padding on very small
+     screens so content doesn't feel cramped against the edges. */
+  .inspector-panel { width: 94vw; }
+  .inspector-header,
+  .inspector-banner,
+  .inspector-body,
+  .analytics-summary,
+  .analytics-grid { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ── Snapshot Export (bounty feature 3) ─────────────────────────────── */
+.snapshot-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-bright);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.snapshot-export-btn:hover { border-color: var(--teal-dim); color: var(--teal); }
+.snapshot-export-btn:disabled { opacity: 0.7; cursor: progress; }
+.snapshot-icon { font-size: 13px; }

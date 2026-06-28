@@ -17,6 +17,8 @@ import { PauseControl }       from './features/pauseControl.js';
 import { LayoutPersistence }  from './features/layoutPersistence.js';
 import { TickerTape }         from './features/tickerTape.js';
 import { RowInspector }       from './features/rowInspector.js';
+import { AnalyticsView }      from './features/analyticsView.js';
+import { SnapshotExport }     from './features/snapshotExport.js';
 
 // ─── DOM references ─────────────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -48,6 +50,8 @@ async function boot() {
   LayoutPersistence.mount($('layout-toggles'));
   TickerTape.mount($('panel-ticker-tape'));
   RowInspector.mount();
+  AnalyticsView.mount($('analytics-control'));
+  SnapshotExport.mount($('snapshot-export-control'));
 
   // 5. Build filter dropdowns from baseline data
   _buildFilterUI(rows);
