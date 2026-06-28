@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFX — RPA Fleet Exchange</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230a0e12'/><text x='4' y='24' font-size='22' font-family='monospace' fill='%235eead4'>R</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<!-- Loading screen -->
+<div id="loading-screen">
+  <div class="load-content">
+    <div class="load-logo">RFX</div>
+    <div class="load-sub">RPA Fleet Exchange</div>
+    <div class="load-spinner"></div>
+    <div class="load-msg">Connecting to exchange feed…</div>
+  </div>
+</div>
+
+<!-- Main app shell (hidden until loaded) -->
+<div id="app-shell" style="display:none">
+
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-logo">RFX</span>
+      <span class="brand-tagline">RPA Fleet Exchange</span>
+    </div>
+
+    <!-- Ticker tape panel -->
+    <div id="panel-ticker-tape" class="tape-panel">
+      <!-- mounted by tickerTape.js -->
+    </div>
+
+    <!-- Controls -->
+    <div class="top-controls">
+      <div id="pause-control"></div>
+    </div>
+  </header>
+
+  <!-- KPI bar -->
+  <div id="panel-kpi-bar">
+    <div id="kpi-bar" class="kpi-bar"></div>
+  </div>
+
+  <!-- Filter / search bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <select id="filter-status" class="filter-select"></select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Asset Class</label>
+      <select id="filter-type" class="filter-select"></select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Sector</label>
+      <select id="filter-industry" class="filter-select"></select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Exchange Region</label>
+      <select id="filter-country" class="filter-select"></select>
+    </div>
+
+    <div class="search-group">
+      <input
+        id="search-input"
+        class="search-input"
+        type="text"
+        placeholder="Symbol lookup — search any field…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <button id="clear-filters" class="clear-btn">✕ Clear</button>
+
+    <div id="result-count" class="result-count"></div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="content-area">
+
+    <!-- Grid (dominant, ~70% width) -->
+    <main class="grid-panel">
+      <div id="grid-container" class="grid-container"></div>
+    </main>
+
+    <!-- Side panels -->
+    <aside class="side-panels">
+
+      <!-- Crash feed -->
+      <div id="panel-crash-feed" class="side-panel crash-panel">
+        <!-- mounted by alertFlash.js -->
+      </div>
+
+      <!-- Layout toggles -->
+      <div class="side-panel layout-panel">
+        <div class="side-panel-header">View</div>
+        <div id="layout-toggles" class="layout-toggles"></div>
+      </div>
+
+    </aside>
+  </div>
+
+</div><!-- /app-shell -->
+
+<!-- dataStream.js must come before main.js so window.initializeRpaStream is defined -->
+<script src="dataStream.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
