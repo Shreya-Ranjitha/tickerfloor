@@ -16,6 +16,7 @@ import { AlertFlash }         from './features/alertFlash.js';
 import { PauseControl }       from './features/pauseControl.js';
 import { LayoutPersistence }  from './features/layoutPersistence.js';
 import { TickerTape }         from './features/tickerTape.js';
+import { RowInspector }       from './features/rowInspector.js';
 
 // ─── DOM references ─────────────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -46,6 +47,7 @@ async function boot() {
   PauseControl.mount($('pause-control'));
   LayoutPersistence.mount($('layout-toggles'));
   TickerTape.mount($('panel-ticker-tape'));
+  RowInspector.mount();
 
   // 5. Build filter dropdowns from baseline data
   _buildFilterUI(rows);
@@ -96,6 +98,7 @@ function _buildFilterUI(rows) {
     sel.addEventListener('change', () => {
       FilterEngine.setFilter(field, sel.value);
       recomputeAndRender();
+      _updateResultCount();
     });
   }
 
@@ -105,6 +108,7 @@ function _buildFilterUI(rows) {
     searchEl.addEventListener('input', () => {
       FilterEngine.setSearch(searchEl.value);
       recomputeAndRender();
+      _updateResultCount();
     });
   }
 
@@ -117,6 +121,7 @@ function _buildFilterUI(rows) {
       if (searchEl) searchEl.value = '';
       Sorter.clear();
       recomputeAndRender();
+      _updateResultCount();
     });
   }
 }

@@ -14,7 +14,7 @@ let _innerEl = null;
 export const TickerTape = {
   mount(containerEl) {
     containerEl.innerHTML = `
-      <div class="tape-label">RFX LIVE</div>
+      <div class="tape-label">TF LIVE</div>
       <div class="tape-track" id="tape-track">
         <div class="tape-inner" id="tape-inner"></div>
       </div>

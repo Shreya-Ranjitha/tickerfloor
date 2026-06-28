@@ -125,7 +125,7 @@ export function primeShadowState(rows) {
  *
  * @param {function(Array)} onBatch - called with each cleaned batch
  */
-export function startStream(onBatch) {
+export function startStream(onBatch, csvUrl = './automation_projects.csv') {
   if (typeof window.initializeRpaStream !== 'function') {
     console.error('[streamAdapter] window.initializeRpaStream not found — is dataStream.js loaded?');
     return;
@@ -134,5 +134,5 @@ export function startStream(onBatch) {
   window.initializeRpaStream((rawBatch) => {
     const cleanBatch = processBatch(rawBatch);
     onBatch(cleanBatch);
-  });
+  }, csvUrl);
 }

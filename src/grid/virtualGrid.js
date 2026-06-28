@@ -15,9 +15,12 @@ import { TickerStore } from '../state/store.js';
 import { formatUSD, formatPct, formatInt, deltaArrow } from '../features/sanitize.js';
 import { Sorter }       from './sorter.js';
 import { FilterEngine } from './filterEngine.js';
+import { RenderScheduler } from '../state/renderScheduler.js';
+import { RowInspector }    from '../features/rowInspector.js';
 
 const ROW_HEIGHT   = 36;   // px — must match CSS .grid-row height
 const POOL_BUFFER  = 5;    // extra rows beyond visible area
+const MIN_POOL_SIZE = 24;  // fallback so a 0-height viewport (pre-layout) never starves the pool
 
 // Column definitions
 const COLUMNS = [
@@ -88,13 +91,17 @@ export const VirtualGrid = {
     _rowWrapper.className = 'grid-row-wrapper';
     _viewport.appendChild(_rowWrapper);
 
-    // Build fixed pool
-    _poolSize = Math.ceil(_viewport.clientHeight / ROW_HEIGHT) + POOL_BUFFER;
-    for (let i = 0; i < _poolSize; i++) {
-      const row = _buildPoolRow();
-      _rowWrapper.appendChild(row);
-      _rowPool.push(row);
-    }
+    // Build fixed pool.
+    // NOTE: clientHeight can be 0 here because the browser hasn't painted the
+    // flex layout yet (mount() runs synchronously during boot). Falling back
+    // to clientHeight alone causes a tiny 5-row pool. We build once now with
+    // a sane minimum, rebuild on the next animation frame (post-layout), and
+    // keep it responsive to future resizes.
+    _buildPool();
+    requestAnimationFrame(() => _buildPool());
+
+    const _ro = new ResizeObserver(() => _buildPool());
+    _ro.observe(_viewport);
 
     _viewport.addEventListener('scroll', _onScroll, { passive: true });
   },
@@ -147,6 +154,40 @@ export const VirtualGrid = {
 
 // --- Private helpers ---
 
+/**
+ * (Re)builds the row pool to match the viewport's current real height.
+ * Safe to call repeatedly — grows the pool by appending new nodes, or
+ * shrinks it by hiding+detaching the extras. Never shrinks below
+ * MIN_POOL_SIZE so a pre-layout (clientHeight === 0) call still yields
+ * a usable pool instead of the old 5-row starvation bug.
+ */
+function _buildPool() {
+  if (!_viewport || !_rowWrapper) return;
+
+  const wanted = Math.max(
+    MIN_POOL_SIZE,
+    Math.ceil(_viewport.clientHeight / ROW_HEIGHT) + POOL_BUFFER
+  );
+
+  if (wanted === _poolSize) return;
+
+  if (wanted > _poolSize) {
+    for (let i = _poolSize; i < wanted; i++) {
+      const row = _buildPoolRow();
+      _rowWrapper.appendChild(row);
+      _rowPool.push(row);
+    }
+  } else {
+    for (let i = _poolSize - 1; i >= wanted; i--) {
+      const node = _rowPool.pop();
+      if (node) node.remove();
+    }
+  }
+
+  _poolSize = wanted;
+  VirtualGrid.render();
+}
+
 function _buildPoolRow() {
   const row = document.createElement('div');
   row.className = 'grid-row';
@@ -158,12 +199,30 @@ function _buildPoolRow() {
     cell.style.minWidth = col.width;
     row.appendChild(cell);
   }
+
+  // Inspector trigger: only opens while the market is halted (paused).
+  // Gated on pause because the row object mutates every ~200ms while the
+  // stream is live — inspecting a moving target would be confusing, and the
+  // pause guarantees a stable snapshot for the duration the panel is open.
+  row.addEventListener('click', () => {
+    if (!RenderScheduler.isPaused()) return;
+    const id = row.dataset.projectId;
+    if (!id) return;
+    const liveRow = TickerStore.get(id);
+    if (!liveRow) return;
+    // Snapshot (shallow copy) so the panel never mutates while open, even
+    // if something else marks the store dirty.
+    RowInspector.open({ ...liveRow });
+  });
+
   return row;
 }
 
 function _writeRowContent(rowNode, row) {
   const cells = rowNode.children;
   const prev  = TickerStore.getPrev(row.project_id);
+
+  rowNode.dataset.projectId = row.project_id;
 
   // Crash flash
   const failed = row.project_status === 'Failed';

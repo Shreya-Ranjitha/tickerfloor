@@ -1,5 +1,5 @@
 /* =====================================================================
-   RFX — RPA Fleet Exchange
+   TickerFloor — Live Automation Exchange
    Dark trading-terminal palette. One accent (teal). Red reserved for crashes only.
    Monospace for all numeric cells — real fintech type choice, not "looks cool."
    ===================================================================== */
@@ -533,3 +533,152 @@ body {
 
 /* ── Utility ─────────────────────────────────────────────────────────── */
 .mono { font-family: var(--mono); }
+
+/* ── Row Inspector (bounty feature) ───────────────────────────────────
+   Opens when a row is clicked while the market is halted. Sits above
+   everything as a centered panel over a dimmed scrim. Uses the same
+   tokens as the rest of the terminal so it doesn't feel bolted on.   */
+
+.grid-row { cursor: default; }
+body.market-halted .grid-row {
+  cursor: pointer;
+}
+body.market-halted .grid-row:hover {
+  background: var(--surface-2);
+  outline: 1px solid var(--teal-dim);
+  outline-offset: -1px;
+}
+
+.inspector-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 11, 0.72);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.inspector-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.inspector-panel {
+  width: min(720px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  transform: translateY(8px) scale(0.98);
+  transition: transform 0.15s ease;
+}
+.inspector-overlay.open .inspector-panel {
+  transform: translateY(0) scale(1);
+}
+
+.inspector-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.inspector-ticker {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 0.5px;
+}
+.inspector-name {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.inspector-status-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.inspector-status-badge.status-active    { color: var(--green); background: var(--green-dim); }
+.inspector-status-badge.status-completed { color: var(--teal);  background: var(--teal-dim); }
+.inspector-status-badge.status-crashed   { color: var(--red);   background: var(--red-dim); }
+.inspector-status-badge.status-other     { color: var(--text-dim); background: var(--border); }
+
+.inspector-close {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+.inspector-close:hover {
+  color: var(--text-bright);
+  border-color: var(--teal-dim);
+}
+
+.inspector-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--amber);
+  background: rgba(251, 191, 36, 0.08);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+}
+.inspector-banner-icon { font-size: 13px; }
+
+.inspector-body {
+  padding: 8px 20px 20px;
+}
+
+.inspector-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.inspector-section:last-child { border-bottom: none; }
+
+.inspector-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.inspector-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 20px;
+}
+
+.inspector-field-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.inspector-field-value {
+  font-size: 14px;
+  font-family: var(--mono);
+  color: var(--text-bright);
+  word-break: break-word;
+}
+.inspector-empty { color: var(--muted); }

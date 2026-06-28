@@ -1,6 +1,6 @@
 /**
  * kpiBar.js
- * RFX Index KPI strip — three live streaming counters.
+ * TickerFloor Index KPI strip — three live streaming counters.
  *   1. Listed Securities (total row count)
  *   2. Units Deployed (total robots_deployed, with delta)
  *   3. Index Cap (total annual_savings_usd, with delta)

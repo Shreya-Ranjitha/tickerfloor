@@ -6,6 +6,7 @@
  */
 
 import { RenderScheduler } from '../state/renderScheduler.js';
+import { RowInspector }    from './rowInspector.js';
 
 let _btnEl     = null;
 let _statusEl  = null;
@@ -35,6 +36,7 @@ export const PauseControl = {
 
 function _updateUI(paused) {
   if (!_btnEl) return;
+  document.body.classList.toggle('market-halted', paused);
   if (paused) {
     _btnEl.innerHTML = '<span class="halt-icon">▶</span> Resume Market';
     _btnEl.classList.add('halted');
@@ -45,5 +47,8 @@ function _updateUI(paused) {
     _btnEl.classList.remove('halted');
     _statusEl.textContent = '';
     _statusEl.classList.remove('halted-label');
+    // Resuming means rows start mutating again — close any open inspector
+    // so the user isn't left staring at a now-stale snapshot.
+    RowInspector.close();
   }
 }

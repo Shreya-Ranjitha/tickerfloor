@@ -4,12 +4,12 @@
  * Persists which side panels the user has enabled across sessions.
  */
 
-const STORAGE_KEY = 'rfx_layout_v1';
+const STORAGE_KEY = 'tickerfloor_layout_v1';
 
 const PANELS = [
   { id: 'panel-crash-feed', label: 'Crash Feed',     defaultVisible: true  },
   { id: 'panel-ticker-tape',label: 'Ticker Tape',    defaultVisible: true  },
-  { id: 'panel-kpi-bar',    label: 'RFX Index Bar',  defaultVisible: true  },
+  { id: 'panel-kpi-bar',    label: 'TickerFloor Index Bar',  defaultVisible: true  },
 ];
 
 function _load() {

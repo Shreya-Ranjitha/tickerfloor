@@ -45,8 +45,15 @@ export const Sorter = {
         _sortStack.push({ key, dir: 'asc' });
       }
     } else {
-      const existing = _sortStack.length === 1 && _sortStack[0].key === key;
-      _sortStack = [{ key, dir: existing ? (_sortStack[0].dir === 'asc' ? 'desc' : 'asc') : 'asc' }];
+      // Single-click cycle: none -> asc -> desc -> none
+      const isSoleSort = _sortStack.length === 1 && _sortStack[0].key === key;
+      if (!isSoleSort) {
+        _sortStack = [{ key, dir: 'asc' }];
+      } else if (_sortStack[0].dir === 'asc') {
+        _sortStack = [{ key, dir: 'desc' }];
+      } else {
+        _sortStack = [];
+      }
     }
   },
 
